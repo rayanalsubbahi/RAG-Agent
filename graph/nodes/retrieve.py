@@ -1,4 +1,4 @@
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 def retrieve(retriever, state):
     '''retrieve content from documents'''

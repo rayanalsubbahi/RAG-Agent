@@ -1,12 +1,7 @@
 from langgraph.graph import END, StateGraph
-
-#retreiver
 from retriever.retriever import Retriever 
-#graph state
 from graph.state import GraphState
-#edges
 from graph.all_edges import GraphEdges
-#nodes
 from graph.all_nodes import GraphNodes
 
 class RAGGraph: 

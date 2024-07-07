@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 def generate_code(llm, state):
     '''generate answer based on documents'''

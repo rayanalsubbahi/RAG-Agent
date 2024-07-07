@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 def generate_based_on_error(llm, state):
     '''generate answer based on documents and stack trace'''

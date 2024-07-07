@@ -1,6 +1,6 @@
 from googlesearch import search
 from langchain_community.document_loaders import WebBaseLoader
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
     
 def web_search(state):
     '''search the web for more documents'''

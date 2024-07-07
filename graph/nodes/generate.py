@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-from Utils import beautify_chat_history, getLastHumanMessage    
+from utils import beautify_chat_history, getLastHumanMessage    
 
 
 def generate(llm, state):

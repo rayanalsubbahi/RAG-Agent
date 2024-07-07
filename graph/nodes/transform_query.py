@@ -1,6 +1,6 @@
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 
 def transform_query(llm, state):

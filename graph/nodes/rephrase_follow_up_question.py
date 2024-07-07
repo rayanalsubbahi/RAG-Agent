@@ -1,7 +1,7 @@
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 
 def rephrase_follow_up_question(llm, state):

@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.schema import Document
 
-from Utils import getLastHumanMessage
+from utils import getLastHumanMessage
 
 
 def clean_documents(llm, state):

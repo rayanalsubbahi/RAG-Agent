@@ -2,4 +2,6 @@
 *.pyc
 *.env
 *.mov
+*.svg
+*.DS_Store
 /vectorstore

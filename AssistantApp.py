@@ -4,7 +4,6 @@ import os
 import base64
 import datetime
 import time
-import re
 from dotenv import load_dotenv
 
 from langchain_anthropic import ChatAnthropic
@@ -15,7 +14,6 @@ from RAGPipeline import Assistant
 
 # Set Environment Variables 
 load_dotenv()
-
 
 def send_message(messages, model, isVision):
     strt = time.time()

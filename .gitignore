@@ -1,0 +1,5 @@
+*.txt
+*.pyc
+*.env
+*.mov
+/vectorstore

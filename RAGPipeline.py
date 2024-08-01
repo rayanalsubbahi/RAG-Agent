@@ -12,9 +12,9 @@ from graph.graph import RAGGraph
 load_dotenv()
 
 class Assistant:
-    def __init__(self, llm):
+    def __init__(self, llm, workflow_type):
         self.llm = llm
-        self.pipeline = RAGGraph(llm)
+        self.pipeline = RAGGraph(llm, workflow_type)
         print("Assistant initialized")
     
     def chat(self, messages):

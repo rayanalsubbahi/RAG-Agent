@@ -14,7 +14,7 @@ def web_search(state):
     urls = []
     documents=[]
     for url in search(question, num_results=3):
-        if 'pdf' in url:
+        if 'pdf' in url or 'perplexity' in url:
             continue
         print('Url', url)
         urls.append(url)

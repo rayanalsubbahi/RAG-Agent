@@ -1,6 +1,8 @@
+from workflow_types import WorkflowType
 
 class GraphEdges:
-    def __init__(self) -> None:
+    def __init__(self, workflow_type: WorkflowType) -> None:
+        self.workflow_type = workflow_type
         pass
     
     def decide_to_generate(self, state):
@@ -13,7 +15,7 @@ class GraphEdges:
             # Perform transform query then search
             return "transform_query"
         else:
-            return "check_code_generation"
+            return "check_code_generation" if self.workflow_type == WorkflowType.ALL else "generate_context"
 
     def decide_to_skipRag(self, state):
         '''decide to skip RAG and continue directly with generation'''
@@ -25,7 +27,7 @@ class GraphEdges:
             return "generate"
         else:
             # Continue with RAG
-            return "check_required_search"
+            return "check_required_search" if self.workflow_type == WorkflowType.ALL else "web_search"
 
     def decide_to_code(self, state):
         '''decide to generate code or general purpose generation'''
@@ -81,7 +83,7 @@ class GraphEdges:
         
         if n_iterations < 3:
             # check type of search required
-            return "check_required_search"
+            return "check_required_search" if self.workflow_type == WorkflowType.ALL else "web_search"
         else:
             # Continue with existing answer
             return "end"

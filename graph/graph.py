@@ -7,17 +7,18 @@ from graph.all_nodes import GraphNodes
 from workflow_types import WorkflowType
 
 class RAGGraph: 
-    def __init__(self, llm, workflow_type) -> None:
+    def __init__(self, llm, workflow_type, parse_str_output) -> None:
         self.retriever = Retriever()
         self.nodes = GraphNodes(llm, self.retriever)
         self.worflow_type = workflow_type
+        self.parse_str_output = parse_str_output
         self.edges = GraphEdges(workflow_type=workflow_type)
         self.pipeline = self.createPipeline()
         
     def invokePipeline(self, messages):
         inputs = {"messages": messages, "documents": [], "search_type": "", "query_type": "", "stack_trace": "",
                   "generation": "", "is_gen_code": False, "is_transform_query": False, 
-                  "n_iterations": 0, "parse_str_output": False}
+                  "n_iterations": 0, "parse_str_output": self.parse_str_output}
         
         for output in self.pipeline.stream(inputs):
             for key, value in output.items():   

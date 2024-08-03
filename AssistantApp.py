@@ -87,9 +87,9 @@ def response_generator(response):
         yield response[start:]
 
 # Function to create the Streamlit app
-def createStreamlitApp(llm, workflow_type):
+def createStreamlitApp(llm, workflow_type, parse_str_output):
     if 'model' not in st.session_state:
-        model = Assistant(llm, workflow_type)
+        model = Assistant(llm, workflow_type, parse_str_output)
         st.session_state['model'] = model
     else:
         model = st.session_state['model']
@@ -150,13 +150,13 @@ def createStreamlitApp(llm, workflow_type):
             print(response["content"])
     return
 
-# llm = ChatAnthropic(model='claude-3-haiku-20240307', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
+llm = ChatAnthropic(model='claude-3-haiku-20240307', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
 # llm = ChatAnthropic(model='claude-3.5-sonnet-20240620', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
-llm = ChatOpenAI(model='gpt-4o-mini-2024-07-18', openai_api_key=os.getenv("OPENAI_API_KEY"))
+# llm = ChatOpenAI(model='gpt-4o-mini-2024-07-18', openai_api_key=os.getenv("OPENAI_API_KEY"))
 # llm = ChatCohere(model='command-r-plus', cohere_api_key=os.getenv("COHERE_API_KEY"))
 # llm = ChatNVIDIA(model='nvidia/nemotron-4-340b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
-# llm = ChatNVIDIA(model='meta/llama3-70b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
-# llm = ChatNVIDIA(model='google/gemma-2-27b-it', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
+# llm = ChatNVIDIA(model='meta/llama-3.1-405b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
+# llm = ChatNVIDIA(model='google/gemma-2-2b-it', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 
-createStreamlitApp(llm=llm, workflow_type=WorkflowType.ALL)
+createStreamlitApp(llm=llm, workflow_type=WorkflowType.ALL, parse_str_output=False)
 

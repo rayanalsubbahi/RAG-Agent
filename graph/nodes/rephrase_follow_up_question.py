@@ -32,8 +32,9 @@ def rephrase_follow_up_question(llm, state):
         2. If it's a question:
         a) If the question relies on context from the chat history, rephrase it to be a standalone question that incorporates necessary context.
         b) If the question is clear and standalone, keep it as is.
-        c) Ensure the rephrased question maintains the conversation flow and context established by the previous history.
-        d) Do NOT answer the question.
+        c) If the question is not relevant to the conversation, still consider rephrasing it to be a standalone question.
+        d) Ensure the rephrased question maintains the conversation flow and context established by the previous history.
+        e) Do NOT answer the question.
 
         3. If it's not a question:
         Return the user input exactly as it is, without any modifications.

@@ -29,7 +29,7 @@ The assistant enables interactive conversations while the RAG pipeline operates 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/rayanalsubbahi/RAG_App.git
+   git clone https://github.com/rayanalsubbahi/RAG-Agent.git
 
 2. Install dependencies:
    ```bash

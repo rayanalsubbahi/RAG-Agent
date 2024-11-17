@@ -10,7 +10,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from langchain_cohere import ChatCohere
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
-from RAGPipeline import Assistant
+
+from assistant import Assistant
 from workflow_types import WorkflowType
 
 # Set Environment Variables 

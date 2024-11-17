@@ -16,6 +16,30 @@ from workflow_types import WorkflowType
 # Set Environment Variables 
 load_dotenv()
 
+# Set page config 
+st.set_page_config(
+    page_title="RAG Assistant",
+    page_icon="🤖",
+    layout="wide"
+)
+
+# Add custom CSS for button styling
+st.markdown("""
+<style>
+    .stButton>button {
+        background: linear-gradient(to right, #FF4B4B, #7E56D9);
+        border: none;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def send_message(messages, model, isVision):
     strt = time.time()
     answer = model.chat(messages)
@@ -63,13 +87,13 @@ def display_chat(chat_data):
         if speaker == "user":
             if "|img|" in message:
                 text = message.split("|img|")[0]
-                st.chat_message(name="User").write(text)
+                st.chat_message(name="User", avatar="👤").write(text)
                 img = message.split("|img|")[1]
                 st.image(img)
             else:
-                st.chat_message(name="User").write(message)
+                st.chat_message(name="User", avatar="👤").write(message)
         elif speaker == "assistant":
-            st.chat_message(name="Assistant").write(message)
+            st.chat_message(name="Assistant", avatar="✨").write(message)
 
 def response_generator(response):
     start = 0
@@ -104,12 +128,12 @@ def createStreamlitApp(llm, workflow_type, parse_str_output):
         history_files[i] = history_files[i].replace("History//", "")
         
     # Add button for new chat
-    if st.sidebar.button("New chat", type='primary'):
+    if st.sidebar.button("➕ New chat", type='primary'):
         st.session_state["history"] = []
         st.session_state.historySelect = "None"
         
     # Display history in a dropdown
-    history_file = st.sidebar.selectbox("Select a chat history", history_files, key='historySelect')
+    history_file = st.sidebar.selectbox("📝 Select a chat history", history_files, key='historySelect')
 
     if history_file and history_file != "None":  # chat history
         # display title
@@ -118,45 +142,56 @@ def createStreamlitApp(llm, workflow_type, parse_str_output):
         chat_data = read_chat_from_file(history_file)
         display_chat(chat_data)
     else:  # model
-        # set title and description
-        st.title("RAG+")
-        st.caption("Assistant to search for information and answer questions for data")
+        # Sidebar content
+        with st.sidebar:
+            st.title("✨ RAG Assistant")
+            st.markdown("""
+            ### About 
+            AI-powered search and Q&A using RAG technology.
+            
+            ### Features ⚡
+            - 📚 Document Search
+            - 🌐 Internet Search 
+            - 💻 Code Generation
+            - 🔍 Context-Aware
+            """)
+
+        # Main content area
+        st.title("✨ RAG Assistant")
+        st.caption("Your AI-powered search companion")
+        st.markdown("---")
             
         if "history" not in st.session_state:
             st.session_state["history"] = []
-            # create json file to store history with current date
             dt = datetime.datetime.now()
             history_name = "history_" + dt.strftime("%y-%m-%d %H:%M:%S") + ".txt"
             st.session_state["history_name"] = history_name
             
         for message in st.session_state["history"]:
             if message["role"] == "user" and message.get("ai_message", False) == False:
-                st.chat_message(name="User").write(message["content"])
+                st.chat_message(name="User", avatar="👤").write(message["content"])
             elif message["role"] == "assistant":
                 resp = message["content"].replace('\n', '  \n')
-                st.chat_message(name="Assistant").write(resp)
+                st.chat_message(name="Assistant", avatar="✨").write(resp)
 
-        # get the user input
-        message = st.chat_input(placeholder="Message here")
-        # send the user input to the model
+        # Chat input
+        message = st.chat_input(placeholder="Ask me anything...")
         if message:
-            # display the user input
-            st.chat_message(name="User").write(message)
-            with st.spinner("Thinking..."):
+            st.chat_message(name="User", avatar="👤").write(message)
+            with st.spinner("🤔 Thinking... "):
                 response = chat(message, model, isVision=False)
-            # display the response from the model to the user
             resp = response["content"].replace('\n', '  \n')
-            st.chat_message(name="Assistant").write_stream(response_generator(resp))
+            st.chat_message(name="Assistant", avatar="✨").write_stream(response_generator(resp))
             print(response["content"])
     return
 
-llm = ChatAnthropic(model='claude-3-haiku-20240307', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
+llm = ChatAnthropic(model='claude-3-5-haiku-20241022', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
 # llm = ChatAnthropic(model='claude-3.5-sonnet-20240620', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
 # llm = ChatOpenAI(model='gpt-4o-mini-2024-07-18', openai_api_key=os.getenv("OPENAI_API_KEY"))
 # llm = ChatCohere(model='command-r-plus', cohere_api_key=os.getenv("COHERE_API_KEY"))
 # llm = ChatNVIDIA(model='nvidia/nemotron-4-340b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
-# llm = ChatNVIDIA(model='meta/llama-3.1-405b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
+# llm = ChatNVIDIA(model='meta/llama-3.1-70b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 # llm = ChatNVIDIA(model='google/gemma-2-2b-it', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
+# llm = ChatNVIDIA(model='microsoft/phi-3.5-moe-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 
 createStreamlitApp(llm=llm, workflow_type=WorkflowType.ALL, parse_str_output=False)
-

@@ -1,6 +1,7 @@
 # Agentic RAG Assistant
 
-![image](https://github.com/user-attachments/assets/9242b30a-45e2-440c-bdab-f929b17114f5)
+![image](https://github.com/user-attachments/assets/861600ee-3841-41e0-ab83-9966352e296d)
+
 
 This repository hosts an implementation of an **Agentic Retrieval-Augmented Generation (RAG) Assistant**. The assistant is designed to dynamically decide whether to:
 

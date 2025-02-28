@@ -10,6 +10,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from langchain_cohere import ChatCohere
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_xai import ChatXAI
 
 from assistant import Assistant
 from workflow_types import WorkflowType
@@ -186,13 +188,20 @@ def createStreamlitApp(llm, workflow_type, parse_str_output):
             print(response["content"])
     return
 
-llm = ChatAnthropic(model='claude-3-5-haiku-20241022', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
-# llm = ChatAnthropic(model='claude-3.5-sonnet-20240620', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
+# llm = ChatAnthropic(model='claude-3-5-haiku-20241022', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
+# llm = ChatAnthropic(model='claude-3-5-sonnet-20241022', anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
 # llm = ChatOpenAI(model='gpt-4o-mini-2024-07-18', openai_api_key=os.getenv("OPENAI_API_KEY"))
-# llm = ChatCohere(model='command-r-plus', cohere_api_key=os.getenv("COHERE_API_KEY"))
+# llm = ChatOpenAI(model='deepseek-chat', base_url='https://api.deepseek.com', api_key=os.getenv("DEEPSEEK_API_KEY"))
+llm = ChatCohere(model='command-r7b-arabic-02-2025', cohere_api_key=os.getenv("COHERE_API_KEY"))
 # llm = ChatNVIDIA(model='nvidia/nemotron-4-340b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 # llm = ChatNVIDIA(model='meta/llama-3.1-70b-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 # llm = ChatNVIDIA(model='google/gemma-2-2b-it', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
 # llm = ChatNVIDIA(model='microsoft/phi-3.5-moe-instruct', nvidia_api_key=os.getenv("NVIDIA_API_KEY"))
+# llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-thinking-exp-01-21', api_key=os.getenv("GEMINI_API_KEY"))
+# llm = ChatXAI(model='grok-2-1212', api_key=os.getenv("GROK_API_KEY"))
+#ngrok tunnel connection through OLLAMA
+# llm = ChatOpenAI(model='command-r7b:latest', base_url='https://a700-34-143-131-129.ngrok-free.app/v1')
+# llm = ChatOpenAI(model='llama3.2:latest', base_url='https://648c-34-83-48-109.ngrok-free.app/v1')
+# llm = ChatOpenAI(model='mistral-small:latest', base_url='https://7b60-34-125-68-15.ngrok-free.app/v1')
 
-createStreamlitApp(llm=llm, workflow_type=WorkflowType.ALL, parse_str_output=False)
+createStreamlitApp(llm=llm, workflow_type=WorkflowType.ALL, parse_str_output=True)

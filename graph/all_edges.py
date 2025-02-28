@@ -35,18 +35,18 @@ class GraphEdges:
         
         is_gen_code = state["is_gen_code"]
         search_type = state["search_type"]
-        
-        print(f"SEARCH TYPE: {search_type}")
-            
+                    
         if is_gen_code:
             # Generate code snippet
             return "generate_code"
-        elif search_type == "custom_knowledge_base" or search_type == "web":
+        elif "custom_knowledge_base" in search_type or 'web' in search_type:
             # Generate answer based on context
             return "generate_context"
-        elif search_type == "own":
+        elif "own" in search_type:
             # Generate answer based on context
             return "generate"
+        else:
+            print('FAILED')
 
     def decide_to_execute(self, state):
         '''decide to execute code snippet'''
@@ -67,10 +67,10 @@ class GraphEdges:
         
         required_search = state["search_type"]
         
-        if required_search == "web":
+        if "web" in required_search:
             # Perform web search
             return "web_search"
-        elif required_search == "custom_knowledge_base":
+        elif "custom_knowledge_base" in required_search:
             # Perform knowledge base search
             return "retrieve"
         else:

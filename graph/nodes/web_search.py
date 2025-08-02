@@ -1,6 +1,7 @@
 import os
 from googlesearch import search
 from googleapiclient.discovery import build
+from langchain_tavily import TavilySearch
 from langchain_community.document_loaders import WebBaseLoader
 from utils import getLastHumanMessage
     
@@ -13,8 +14,9 @@ def web_search(state):
     question = getLastHumanMessage(messages)
      
     # Search
-    # urls = searchgoogle(question, max_results=3)
-    urls = alternative_search(question, max_results=3)
+    # urls = google_search(question, max_results=3)
+    # urls = alternative_search(question, max_results=3)
+    urls = tavily_search(question, max_results=1)
   
     # Load docs in parallel    
     loader = WebBaseLoader(urls)
@@ -22,7 +24,7 @@ def web_search(state):
     state["documents"] = documents
     return state
 
-def searchgoogle(query, max_results=3):
+def google_search(query, max_results=3):
     '''search the official google search engine'''
     service = build("customsearch", "v1", developerKey=os.getenv("GOOGLE_SEARCH_API_KEY"))
     res = service.cse().list(q=query, cx=os.getenv("GOOGLE_CSI_ID"), num=max_results).execute()
@@ -36,7 +38,7 @@ def searchgoogle(query, max_results=3):
     
     return urls
 
-def alternative_search(query, max_results=3):
+def alternative_search(query, max_results=5):
     '''search the web for more documents'''
     urls = []
     for url in search(query, num_results=max_results):
@@ -44,5 +46,32 @@ def alternative_search(query, max_results=3):
             continue
         print('Url', url)
         urls.append(url)
+    urls = urls[:max_results]
+    return urls
+
+def tavily_search(query, max_results=5):
+    '''search the web for more documents'''
+    tool = TavilySearch(
+        max_results=max_results,
+        topic="general",
+        include_answer=False,
+        include_raw_content=False,
+        include_images=False,
+        # include_image_descriptions=False,
+        # search_depth="basic",
+        # time_range="day",
+        # include_domains=None,
+        # exclude_domains=None
+    )
+    result = tool.invoke({"query": query})  
+    print(result)
+    
+    urls = []
+    for item in result['results']:
+        if 'pdf' in item['url'] or 'perplexity' in item['url']:
+            continue
+        print(item['title'], item['url'])
+        urls.append(item['url'])
+
     urls = urls[:max_results]
     return urls

@@ -121,8 +121,8 @@ AVAILABLE_MODELS = {
     "ollama-local": ModelConfig(
         name="Ollama Local",
         provider="ollama",
-        model_id=":latest",
-        base_url="https://196.219.58.150:11434/"
+        model_id="gemma3:4b",
+        base_url="http://localhost:11434/"
     )
 }
 
@@ -207,4 +207,4 @@ def create_llm(model_key: str, **kwargs) -> Any:
 
 def get_default_model() -> str:
     """Get the default model key."""
-    return "command-r"  # Use Cohere Command R
+    return "ollama-local"  # Use Ollama Local

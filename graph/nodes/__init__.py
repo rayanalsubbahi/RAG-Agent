@@ -3,7 +3,7 @@
 # Retrieval nodes
 from .retrieval.retrieve import RetrieveNode
 from .retrieval.web_search import WebSearchNode
-from .retrieval.grade_documents import GradeDocumentsNode
+from .processing.grade_documents import GradeDocumentsNode
 
 # Generation nodes  
 from .generation.generate import GenerateNode

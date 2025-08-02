@@ -4,6 +4,7 @@ from graph.core.retrieval.vector_retriever import VectorRetriever
 from graph.core.workflow_builder import WorkflowBuilder
 from graph.workflows.rag_workflow import RAGWorkflowBuilder
 from graph.workflows.web_workflow import WebWorkflowBuilder
+from graph.workflows.retrieval_workflow import RetrievalWorkflowBuilder
 from graph.core.types import WorkflowType
 
 
@@ -43,7 +44,7 @@ class RAGGraph:
         elif self.workflow_type == WorkflowType.WEB:
             return WebWorkflowBuilder.create_web_workflow()
         elif self.workflow_type == WorkflowType.RETRIEVE:
-            return RAGWorkflowBuilder.create_simple_rag_workflow()
+            return RetrievalWorkflowBuilder.create_retrieval_workflow()
         else:
             # Default to full workflow for maximum functionality
             return RAGWorkflowBuilder.create_full_workflow()

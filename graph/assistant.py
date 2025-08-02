@@ -24,3 +24,21 @@ class Assistant:
         """Process chat conversation and return response."""
         return self.pipeline.invoke_pipeline(messages)
     
+    def update_workflow(self, new_workflow_type: WorkflowType):
+        """Update the workflow type and rebuild the pipeline."""
+        if new_workflow_type != self.workflow_type:
+            print(f"🔄 Switching workflow from {self.workflow_type} to {new_workflow_type}")
+            self.workflow_type = new_workflow_type
+            
+            # Rebuild the pipeline with the new workflow type
+            self.pipeline = RAGGraph(self.llm, new_workflow_type, self.parse_str_output)
+            print(f"✅ Workflow updated successfully")
+    
+    def get_workflow_info(self) -> dict:
+        """Get information about the current workflow configuration."""
+        return {
+            "workflow_type": self.workflow_type,
+            "parse_str_output": self.parse_str_output,
+            "pipeline_info": self.pipeline.get_workflow_info() if hasattr(self.pipeline, 'get_workflow_info') else None
+        }
+    

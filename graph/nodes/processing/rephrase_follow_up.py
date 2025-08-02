@@ -33,44 +33,60 @@ class RephraseFollowUpNode(LLMNode):
             rephrased_input: str = Field(description="Rephrased standalone user input")
             input_type: str = Field(description="Type of user input as 'question' or 'statement'")
         
-        # Create prompt template
-        template = """Given a chat history and a follow-up user input, process the input as follows:
+        # Create prompt template - using original proven template
+        template = '''
+        Given a chat history and a follow-up user input, process the input as follows:
 
-                     1. Determine if the user input is a question, query, or request (collectively referred to as "question") or not
-                     2. If it's a question: rephrase it to be a standalone question by incorporating relevant context from the chat history
-                     3. If it's not a question: return it as-is and classify it as a "statement"
+        1. Determine if the user input is a question, query, or request (collectively referred to as "question") or not
 
-                     Chat History:
-                     {chat_history}
+        2. If it's a question:
+        a) If the question relies on context from the chat history, rephrase it to be a standalone question that incorporates necessary context.
+        b) If the question is clear and standalone, keep it as is.
+        c) If the question is not relevant to the conversation, still consider rephrasing it to be a standalone question.
+        d) Ensure the rephrased question maintains the conversation flow and context established by the previous history.
+        e) Do NOT answer the question.
 
-                     Follow-up Input: {question}
+        3. If it's not a question:
+        Return the user input exactly as it is, without any modifications.
 
-                     Provide your response in the following JSON format:
-                     {{
-                         "rephrased_input": "your rephrased standalone question or original statement",
-                         "input_type": "question" or "statement"
-                     }}"""
+        4. For all inputs, determine the type: either 'question' or 'statement'.
+
+        5. Return the processed input and its type as rephrased_input and input_type.
+
+        Chat History: {chat_history}
+        Follow-up User Input: {question}
+        '''
+        
+        if parse_str_output:
+            template += """\nYou MUST only return a JSON object with the keys 'rephrased_input' and 'input_type'. \n"""
         
         prompt = PromptTemplate(
             template=template,
-            input_variables=["chat_history", "question"]
+            input_variables=["question", "chat_history"]
         )
         
-        # Setup parser and chain
-        parser = JsonOutputParser(pydantic_object=RephrasedInput)
-        chain = prompt | self.llm | parser
-        
+        # Chain setup
+        if not parse_str_output:
+            llm_structured_output = self.llm.with_structured_output(RephrasedInput)
+            rag_chain = prompt | llm_structured_output
+        else:
+            rag_chain = prompt | self.llm | JsonOutputParser()
+
         # Execute chain
-        result = chain.invoke({
-            "chat_history": chat_history,
-            "question": question
-        })
+        response = rag_chain.invoke({"question": question, "chat_history": chat_history})
         
-        # Update state
-        state["messages"][-1]["content"] = result["rephrased_input"]
-        state["query_type"] = result["input_type"]
+        if parse_str_output:
+            rephrased_question = response["rephrased_input"]
+            input_type = response["input_type"]
+        else:
+            rephrased_question = response.rephrased_input
+            input_type = response.input_type
+            
+        print(f"Rephrased response: {response}")
         
-        print(f"Rephrased input: {result['rephrased_input']}")
+        # Update state - append rephrased question like original
+        messages.append({"role": "user", "content": rephrased_question, "ai_message": True})
+        state["query_type"] = input_type
         return state
     
     def validate_inputs(self, state: GraphState) -> bool:

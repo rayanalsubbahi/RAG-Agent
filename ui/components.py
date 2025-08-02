@@ -239,4 +239,41 @@ class ModelSelector:
                     assistant.update_workflow(workflow_options[selected])
                     st.rerun()
             
+            # Display current workflow info
+            ModelSelector._display_workflow_info(current_workflow)
+            
             st.divider()
+    
+    @staticmethod
+    def _display_workflow_info(current_workflow):
+        """Display information about the current workflow."""
+        workflow_descriptions = {
+            "all": {
+                "icon": "🎯",
+                "name": "Complete RAG",
+                "description": "Full AI assistant with document search, web search, and code generation"
+            },
+            "web": {
+                "icon": "🌐", 
+                "name": "Web Search",
+                "description": "Real-time web search with document processing and query optimization"
+            },
+            "retrieve": {
+                "icon": "📚",
+                "name": "Document Retrieval", 
+                "description": "Knowledge base search with relevance grading and query transformation"
+            }
+        }
+        
+        info = workflow_descriptions.get(current_workflow, workflow_descriptions["all"])
+        
+        st.markdown(f"""
+        <div style='background-color: #f0f2f6; padding: 10px; border-radius: 5px; margin: 10px 0;'>
+            <div style='font-size: 14px; font-weight: bold; color: #262730;'>
+                {info['icon']} {info['name']} Active
+            </div>
+            <div style='font-size: 12px; color: #666; margin-top: 5px;'>
+                {info['description']}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)

@@ -18,3 +18,29 @@ def decide_generation_type(state: GraphState) -> str:
         return "end"
 
 
+def decide_to_generate(state: GraphState) -> str:
+    """Decide to transform query or proceed with generation (from old logic)."""
+    print("----Deciding to generate or search----")
+    
+    is_transform_query = state.get("is_transform_query", False)
+    
+    if is_transform_query:
+        # Perform transform query then search
+        return "transform_query"
+    else:
+        return "check_code_generation"
+
+
+def decide_to_generate_web(state: GraphState) -> str:
+    """Decide to transform query or proceed with generation for web workflow."""
+    print("----Deciding to generate or search (web workflow)----")
+    
+    is_transform_query = state.get("is_transform_query", False)
+    
+    if is_transform_query:
+        # Perform transform query then search
+        return "transform_query"
+    else:
+        return "generate_context"
+
+

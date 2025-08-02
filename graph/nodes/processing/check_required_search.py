@@ -32,61 +32,68 @@ class CheckRequiredSearchNode(LLMNode):
         if not parse_str_output:
             llm_with_structured_output = self.llm.with_structured_output(SearchType)
         
-        # Create prompt template
+        # Create prompt template - using original proven template with better structure
         template = """You will be given a user's search query and need to determine the most appropriate search type to use in order to find the best information to address the query. 
-                    
-                    The three search types available are:
-                    1. Custom knowledge search - searches a curated knowledge base on the following two specific topics: 
-                       - Adversarial Attacks on Large Language Models
-                       - Large Language Models Powered Autonomous Agents
-                    2. Own model knowledge search - searches the advanced language model's comprehensive knowledge spanning a vast range of topics including science, technology, history, culture, and more.
-                       This language model possesses remarkable reasoning, analysis, coding, and creative capabilities. Its knowledge base was trained on a massive corpus of
-                       high-quality data, allowing it to draw connections and synthesize information from diverse sources.
-                    3. Web search - searches the internet for the most current and up-to-date information
-                    
-                    The user has asked the following question:
-                    <question>
-                    {question}
-                    </question>
-                    
-                    The answer MUST be one of the following:
-                    - 'own' for Own model knowledge search
-                    - 'custom_knowledge_base' for Custom knowledge search
-                    - 'web' for Web search
-                    
-                    Determine which search type would be most appropriate for answering this question effectively."""
+                
+                The three search types available are:
+                1. Custom knowledge search - searches a curated knowledge base on the following two specific topics: 
+                - Adversarial Attacks on Large Language Models
+                - Large Language Models Powered Autonomous Agents
+                2. Own model knowledge search - 
+                searches the advanced language model's comprehensive knowledge spanning a vast range of topics including science, technology, history, culture, and more.
+                This language model possesses remarkable reasoning, analysis, coding, and creative capabilities. Its knowledge base was trained on a massive corpus of
+                high-quality data, allowing it to draw connections and synthesize information from diverse sources.
+                3. Web search - searches the internet for the most current and up-to-date information
+                
+                The user has asked the following question:
+                <question>
+                {question}
+                </question>
+                
+                Carefully analyze the query and determine which of the three search types would be most likely to surface the most relevant and useful information for the user.
+
+                Decide the best source to answer the question:
+
+                <answer>
+                'own' if your own knowledge is sufficient
+                'custom_knowledge_base' if the custom external knowledge base with the specific is likely to contain the answer
+                'web' if a web search is necessary to find the most accurate and current information
+                </answer>
+                
+                Return the search type as a string value of 'own', 'custom_knowledge_base' or 'web'
+                """
         
         if parse_str_output:
-            template += "\nYou MUST include your response in <answer> tags."
+            template += """\nYou MUST include your response in <answer> tags. \n"""
         
-        prompt = PromptTemplate(template=template, input_variables=["question"])
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=["question"],
+        )
         
         # Execute chain
         if parse_str_output:
             chain = prompt | self.llm | StrOutputParser()
-            generation = chain.invoke({"question": question})
-            answer = extract_answer(generation)
+            score = chain.invoke({"question": question})
+            search_type_val = extract_answer(score)
         else:
-            try:
-                chain = prompt | llm_with_structured_output
-                generation = chain.invoke({"question": question})
-                answer = generation.search_type
-            except Exception as e:
-                print(f"Structured output failed: {e}")
-                # Fallback to string parsing
-                chain = prompt | self.llm | StrOutputParser()
-                generation = chain.invoke({"question": question})
-                answer = str(generation).lower()
-                # Simple parsing for search type
-                if "web" in answer:
-                    answer = "web"
-                elif "knowledge" in answer or "custom" in answer:
-                    answer = "custom_knowledge_base"
-                else:
-                    answer = "own"
+            chain = prompt | llm_with_structured_output
+            score = chain.invoke({"question": question})
+            search_type_val = score.search_type
+
+        print(f"Score: {score}")
         
-        # Update state
-        state["search_type"] = answer
+        # Add original logging messages
+        if search_type_val == "own":
+            print("---WILL USE OWN KNOWLEDGE---")
+        elif search_type_val == "custom_knowledge_base":
+            print("---WILL RUN KNOWLEDGE BASE SEARCH---")
+        else:
+            print("---WILL RUN WEB SEARCH---")    
+            
+        # Update state - include documents initialization like original
+        state["search_type"] = search_type_val
+        state["documents"] = []
         
         return state
     

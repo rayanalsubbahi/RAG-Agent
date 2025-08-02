@@ -1,4 +1,5 @@
 from langchain.prompts import PromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 from graph.core.base_node import LLMNode
 from graph.state import GraphState
 from graph.core.utils import get_last_human_message
@@ -16,41 +17,40 @@ class TransformQueryNode(LLMNode):
         
         messages = state["messages"]
         question = get_last_human_message(messages)
-        n_iterations = state.get("n_iterations", 0)
         
-        # Create prompt for query transformation
+        n_iterations = state.get("n_iterations", 0)
+        n_iterations += 1
+        
+        # Create prompt for query transformation - using original proven template
         prompt = PromptTemplate(
-            template="""You are a query transformation expert. Your job is to rephrase the user's question to make it more effective for search.
-                        
-                        Original question: {question}
-                        
-                        Please provide a transformed version that:
-                        1. Uses more specific and searchable terms
-                        2. Expands abbreviations and acronyms
-                        3. Adds relevant context keywords
-                        4. Maintains the original intent
-                        
-                        Transformed question:""",
-            input_variables=["question"]
+            template="""You are generating questions that is well optimized for searching the internet. \n 
+        Look at the input and try to reason about the underlying sematic intent / meaning. \n 
+        Here is the initial question:
+        \n ------- \n
+        {question} 
+        \n ------- \n
+        Formulate an improved question. \n
+        Return a JSON object with the key 'better_question' and the value as the improved question. \n""",
+            input_variables=["question"],
         )
         
-        # Execute transformation
-        chain = prompt | self.llm
-        transformed_result = chain.invoke({"question": question})
+        # Execute transformation with JSON output parser (original logic)
+        chain = prompt | self.llm | JsonOutputParser()
         
-        # Update the last message with transformed query
-        if hasattr(transformed_result, 'content'):
-            transformed_query = transformed_result.content.strip()
-        else:
-            transformed_query = str(transformed_result).strip()
+        try:
+            better_question_result = chain.invoke({"question": question})
+            better_question = better_question_result["better_question"]
+        except Exception as e:
+            print(f"Error in query transformation: {e}")
+            # Fallback to original question if transformation fails
+            better_question = question
         
-        # Update the messages with transformed query
-        state["messages"][-1]["content"] = transformed_query
-        state["is_transform_query"] = False  # Reset the flag
-        state["n_iterations"] = n_iterations + 1
+        # Update messages with improved question (original logic)
+        messages.append({"role": "user", "content": better_question, "ai_message": True})
+        print(f"Improved question: {better_question}")
         
-        print(f"Original: {question}")
-        print(f"Transformed: {transformed_query}")
+        # Update state
+        state["n_iterations"] = n_iterations
         
         return state
     

@@ -1,31 +1,29 @@
-"""Web-only search workflow with full original logic."""
+"""Document retrieval-only workflow with full original logic."""
 
 from graph.core.workflow_builder import WorkflowBuilder
-from graph.nodes.retrieval.web_search import WebSearchNode
+from graph.nodes.retrieval.retrieve import RetrieveNode
 from graph.nodes.processing.grade_documents import GradeDocumentsNode
-from graph.nodes.processing.clean_documents import CleanDocumentsNode
 from graph.nodes.processing.rephrase_follow_up import RephraseFollowUpNode
 from graph.nodes.processing.transform_query import TransformQueryNode
 from graph.nodes.generation.generate_context import GenerateContextNode
 from graph.nodes.generation.generate import GenerateNode
 
-from graph.edges.conditions.search_conditions import decide_rag_path, transform_query_search_web
 from graph.edges.conditions.generation_conditions import decide_to_generate_web
+from graph.edges.conditions.search_conditions import decide_rag_path_retrieval, transform_query_search_retrieval
 
 
-class WebWorkflowBuilder:
-    """Builder for web-only search workflow."""
+class RetrievalWorkflowBuilder:
+    """Builder for knowledge base retrieval-only workflow."""
     
     @staticmethod
-    def create_web_workflow() -> WorkflowBuilder:
-        """Create a web-only search workflow matching original logic."""
-        builder = WorkflowBuilder("web_workflow")
+    def create_retrieval_workflow() -> WorkflowBuilder:
+        """Create a knowledge base retrieval-only workflow matching original logic."""
+        builder = WorkflowBuilder("retrieval_workflow")
         
-        # Add all nodes needed for web workflow
+        # Add all nodes needed for retrieval workflow
         builder.add_nodes([
             RephraseFollowUpNode(),
-            WebSearchNode(),  # Will use config defaults
-            CleanDocumentsNode(),
+            RetrieveNode(),
             GradeDocumentsNode(),
             TransformQueryNode(),
             GenerateContextNode(),
@@ -38,16 +36,15 @@ class WebWorkflowBuilder:
         # Entry decision: Skip RAG or continue (original logic)
         builder.add_conditional_edge(
             "rephrase_follow_up_question",
-            decide_rag_path,
+            decide_rag_path_retrieval,
             {
                 "generate": "generate",
-                "web_search": "web_search",
+                "retrieve": "retrieve",
             }
         )
         
-        # Web search flow (original logic)
-        builder.add_simple_edge("web_search", "clean_documents")
-        builder.add_simple_edge("clean_documents", "grade_documents")
+        # Knowledge base retrieval flow (original logic)
+        builder.add_simple_edge("retrieve", "grade_documents")
         
         # Grading decision (original logic)
         builder.add_conditional_edge(
@@ -62,9 +59,9 @@ class WebWorkflowBuilder:
         # Transform query loop back (original logic)
         builder.add_conditional_edge(
             "transform_query",
-            transform_query_search_web,
+            transform_query_search_retrieval,
             {
-                "web_search": "web_search",
+                "retrieve": "retrieve",
                 "end": "end",
             }
         )

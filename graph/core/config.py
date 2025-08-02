@@ -1,56 +1,96 @@
-"""Configuration settings for the RAG system."""
+"""Centralized configuration settings for the RAG system."""
 
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from typing import Optional
 
 
 @dataclass
-class WorkflowConfig:
-    """Configuration for workflow execution parameters."""
+class SearchConfig:
+    """Configuration for search operations."""
     
-    # Iteration limits
-    max_execution_iterations: int = 3
-    max_search_iterations: int = 3
+    # Web search settings
+    web_search_method: str = "tavily"
+    web_max_results: int = 3
+    google_api_key: Optional[str] = None
+    google_csi_id: Optional[str] = None
+    
+    # Document processing settings  
+    relevance_threshold: float = 0.5
     max_transform_iterations: int = 3
+
+
+@dataclass 
+class AsyncConfig:
+    """Configuration for async processing."""
     
-    # Timeout settings
-    execution_timeout: Optional[int] = None
-    search_timeout: Optional[int] = None
+    # Concurrency settings
+    max_concurrent_documents: int = 10
     
-    # Debug settings
-    debug_mode: bool = False
-    verbose_logging: bool = False
+    # Adaptive concurrency thresholds
+    small_batch_size: int = 5
+    medium_batch_size: int = 20
+    small_batch_concurrency: int = 3
+    medium_batch_concurrency: int = 8
+    
+    def get_optimal_concurrency(self, num_documents: int) -> int:
+        """Get optimal concurrency based on document count."""
+        if num_documents <= self.small_batch_size:
+            return min(num_documents, self.small_batch_concurrency)
+        elif num_documents <= self.medium_batch_size:
+            return min(num_documents, self.medium_batch_concurrency)
+        else:
+            return self.max_concurrent_documents
+
+
+@dataclass
+class ExecutionConfig:
+    """Configuration for code execution."""
+    
+    max_execution_iterations: int = 3
+
+
+@dataclass
+class WorkflowConfig:
+    """Master configuration containing all sub-configurations."""
+    
+    # Sub-configurations
+    search: SearchConfig = field(default_factory=SearchConfig)
+    async_processing: AsyncConfig = field(default_factory=AsyncConfig)
+    execution: ExecutionConfig = field(default_factory=ExecutionConfig)
+    
+    # Direct access for legacy compatibility
+    max_execution_iterations: int = 3
     
     def __post_init__(self):
-        """Validate configuration values."""
-        if self.max_execution_iterations <= 0:
-            raise ValueError("max_execution_iterations must be positive")
-        if self.max_search_iterations <= 0:
-            raise ValueError("max_search_iterations must be positive")
-        if self.max_transform_iterations <= 0:
-            raise ValueError("max_transform_iterations must be positive")
-
-
-# Default configuration instance
-DEFAULT_CONFIG = WorkflowConfig()
+        """Load from environment and validate."""
+        self._load_from_environment()
+    
+    def _load_from_environment(self):
+        """Load configuration values from environment variables."""
+        if os.getenv("GOOGLE_SEARCH_API_KEY"):
+            self.search.google_api_key = os.getenv("GOOGLE_SEARCH_API_KEY")
+        if os.getenv("GOOGLE_CSI_ID"):
+            self.search.google_csi_id = os.getenv("GOOGLE_CSI_ID")
+    
+    
+# Global configuration instance
+_GLOBAL_CONFIG: Optional[WorkflowConfig] = None
 
 
 def get_config() -> WorkflowConfig:
     """Get the current workflow configuration."""
-    return DEFAULT_CONFIG
+    global _GLOBAL_CONFIG
+    if _GLOBAL_CONFIG is None:
+        _GLOBAL_CONFIG = WorkflowConfig()
+    return _GLOBAL_CONFIG
 
 
-def set_config(config: WorkflowConfig) -> None:
-    """Set the global workflow configuration."""
-    global DEFAULT_CONFIG
-    DEFAULT_CONFIG = config
+def get_search_config() -> SearchConfig:
+    """Get search configuration."""
+    return get_config().search
 
 
-def update_config(**kwargs) -> None:
-    """Update specific configuration values."""
-    global DEFAULT_CONFIG
-    for key, value in kwargs.items():
-        if hasattr(DEFAULT_CONFIG, key):
-            setattr(DEFAULT_CONFIG, key, value)
-        else:
-            raise ValueError(f"Unknown configuration key: {key}")
+def get_async_config() -> AsyncConfig:
+    """Get async processing configuration."""
+    return get_config().async_processing

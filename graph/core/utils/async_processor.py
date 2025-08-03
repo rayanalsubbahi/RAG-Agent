@@ -3,7 +3,7 @@
 import asyncio
 from typing import List, Callable, Any, Optional
 from langchain.schema import Document
-from graph.core.config import get_async_config, get_search_config
+from config.config import get_async_config, get_search_config
 
 
 class AsyncDocumentProcessor:

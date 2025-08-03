@@ -8,7 +8,7 @@ from langchain_community.document_loaders import WebBaseLoader
 from graph.core.base_node import BaseNode
 from graph.state import GraphState
 from graph.core.utils import get_last_human_message
-from graph.core.config import get_search_config
+from config.config import get_search_config
 
 
 class WebSearchNode(BaseNode):

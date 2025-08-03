@@ -1,7 +1,7 @@
 """Reusable edge conditions for search-related decisions."""
 
 from graph.state import GraphState
-from graph.core.config import get_search_config
+from config.config import get_search_config
 
 
 def decide_search_type(state: GraphState) -> str:

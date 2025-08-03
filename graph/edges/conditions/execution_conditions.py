@@ -1,7 +1,7 @@
 """Reusable edge conditions for code execution-related decisions."""
 
 from graph.state import GraphState
-from graph.core.config import get_config
+from config.config import get_config
 
 def decide_execution_path(state: GraphState) -> str:
     """Decide whether to execute code or end."""

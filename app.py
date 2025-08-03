@@ -8,7 +8,7 @@ from graph.core.types import WorkflowType
 from ui.streamlit_app import create_streamlit_app
 
 # Configuration - Change these values as needed
-MODEL_NAME = None  # Set to None to use default, or specify model name like "gpt-4", "ollama-llama3", etc.
+MODEL_NAME = 'gpt-4o-mini'  # Set to None to use default, or specify model name like "gpt-4", "ollama-llama3", etc.
 WORKFLOW_TYPE = WorkflowType.ALL  # Options: WorkflowType.ALL, WorkflowType.WEB, WorkflowType.RETRIEVE
 
 
@@ -38,7 +38,7 @@ def main():
     create_streamlit_app(
         llm=llm,
         workflow_type=WORKFLOW_TYPE,
-        parse_str_output=True
+        parse_str_output=False
     )
 
 

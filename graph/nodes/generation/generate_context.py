@@ -26,7 +26,10 @@ class GenerateContextNode(LLMNode):
                         {context} 
 
                         Here is the user question: {question}
-                        You must not directly reference or mention the source documents or information in your answer.
+                        You MUST accurately reflect the retrieved contents in your answer.
+                        YOU MUST NOT use any external knowledge or information outside of the provided context.
+                        You MUST NOT directly reference or mention the name of source documents.
+                        
                         Be detailed and provide a comprehensive response to the user question.
                         """,
             input_variables=["context", "question"]
